@@ -35,6 +35,9 @@ jobs:
       - name: Install npm dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Install Salesforce Mobile SDK for Android
+        run: node installandroid.js
+
       - name: TypeScript check
         run: npx tsc --noEmit
 
@@ -94,6 +97,9 @@ jobs:
 
       - name: Install npm dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Install Salesforce Mobile SDK for Android
+        run: node installandroid.js
 
       # AGP requires JDK 17 to run the build.
       - name: Set up JDK 17
