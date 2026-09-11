@@ -1,5 +1,8 @@
 name: Android Build
 
+permissions:
+  contents: read
+
 on:
   push:
     paths:
@@ -8,6 +11,7 @@ on:
   pull_request:
     paths:
       - "mobile/**"
+      - ".github/workflows/android-build.yml"
   workflow_dispatch:
     inputs:
       build_release:
@@ -32,8 +36,17 @@ jobs:
           cache: "yarn"
           cache-dependency-path: mobile/yarn.lock
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install npm dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Restore Salesforce Mobile SDK cache
+        uses: actions/cache@v4
+        with:
+          path: mobile/mobile_sdk/SalesforceMobileSDK-Android
+          key: salesforce-mobile-sdk-android-${{ runner.os }}-${{ hashFiles('mobile/package.json', 'mobile/installandroid.js') }}
 
       - name: Install Salesforce Mobile SDK for Android
         run: node installandroid.js
@@ -95,8 +108,17 @@ jobs:
           cache: "yarn"
           cache-dependency-path: mobile/yarn.lock
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install npm dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Restore Salesforce Mobile SDK cache
+        uses: actions/cache@v4
+        with:
+          path: mobile/mobile_sdk/SalesforceMobileSDK-Android
+          key: salesforce-mobile-sdk-android-${{ runner.os }}-${{ hashFiles('mobile/package.json', 'mobile/installandroid.js') }}
 
       - name: Install Salesforce Mobile SDK for Android
         run: node installandroid.js
@@ -122,9 +144,28 @@ jobs:
         run: chmod +x ./gradlew
 
       # Keystore is decoded to an ephemeral runner path and never committed to the repo.
+      - name: Validate release signing configuration
+        working-directory: mobile/android/app
+        env:
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_RELEASE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
+          ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+          ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+        run: |
+          test -n "$ANDROID_RELEASE_KEYSTORE_BASE64"
+          test -n "$ANDROID_RELEASE_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_RELEASE_KEY_ALIAS"
+          test -n "$ANDROID_RELEASE_KEY_PASSWORD"
+
       - name: Decode release keystore
         working-directory: mobile/android/app
-        run: echo "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
+        env:
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_RELEASE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
+          ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+        run: |
+          printf '%s' "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > release.keystore
+          keytool -list -keystore release.keystore -storepass "$ANDROID_RELEASE_KEYSTORE_PASSWORD" -alias "$ANDROID_RELEASE_KEY_ALIAS" > /dev/null
 
       - name: Build signed release APK and AAB
         working-directory: mobile/android
@@ -133,6 +174,8 @@ jobs:
           ORG_GRADLE_PROJECT_SK_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
           ORG_GRADLE_PROJECT_SK_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
           ORG_GRADLE_PROJECT_SK_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_SK_VERSION_CODE: ${{ github.run_number }}
+          ORG_GRADLE_PROJECT_SK_VERSION_NAME: ${{ github.ref_name }}-${{ github.run_number }}
         run: ./gradlew assembleRelease bundleRelease --stacktrace
 
       - name: Remove decoded keystore
