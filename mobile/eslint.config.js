@@ -5,5 +5,13 @@ const { FlatCompat } = require('@eslint/eslintrc');
 const compat = new FlatCompat({ baseDirectory: __dirname });
 
 module.exports = [
+  {
+    ignores: ['mobile_sdk/**'],
+  },
   ...compat.extends('@react-native'),
+  {
+    rules: {
+      'react/no-unstable-nested-components': ['warn', { allowAsProps: true }],
+    },
+  },
 ];
