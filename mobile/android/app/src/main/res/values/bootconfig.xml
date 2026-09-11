@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="remoteAccessConsumerKey">3MVG9dAEux2v1sLtAzOTMVekjpCZmHSu5arj4UKZB1de4D9N84lzdpCBUTBeXtVt7gvMzyck4zS00gADKkBL1</string>
+    <string name="oauthRedirectURI">sksk://oauth/success</string>
+</resources>
