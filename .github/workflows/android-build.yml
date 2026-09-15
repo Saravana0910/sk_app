@@ -67,11 +67,15 @@ jobs:
           distribution: zulu
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # android-actions/setup-android@v3 fails trying to install the legacy 'tools'
+      # package, which Google removed; ubuntu-latest already ships a licensed SDK.
+      - name: Add Android cmdline-tools to PATH
+        run: echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
 
       - name: Install SDK platform and build-tools
-        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;35.0.0"
+        run: |
+          yes | sdkmanager --licenses > /dev/null
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;35.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -130,11 +134,15 @@ jobs:
           distribution: zulu
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # android-actions/setup-android@v3 fails trying to install the legacy 'tools'
+      # package, which Google removed; ubuntu-latest already ships a licensed SDK.
+      - name: Add Android cmdline-tools to PATH
+        run: echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
 
       - name: Install SDK platform and build-tools
-        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;35.0.0"
+        run: |
+          yes | sdkmanager --licenses > /dev/null
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;35.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
