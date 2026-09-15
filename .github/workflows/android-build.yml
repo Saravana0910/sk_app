@@ -72,6 +72,16 @@ jobs:
       - name: Add Android cmdline-tools to PATH
         run: echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
 
+      - name: Restore Android SDK components cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/platforms
+            /usr/local/lib/android/sdk/build-tools
+            /usr/local/lib/android/sdk/ndk
+            /usr/local/lib/android/sdk/licenses
+          key: android-sdk-components-${{ runner.os }}-android-36-build-tools-35.0.0-ndk-27.1.12297006
+
       - name: Install SDK platform and build-tools
         run: |
           yes | sdkmanager --licenses > /dev/null
@@ -139,6 +149,16 @@ jobs:
       - name: Add Android cmdline-tools to PATH
         run: echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
 
+      - name: Restore Android SDK components cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/platforms
+            /usr/local/lib/android/sdk/build-tools
+            /usr/local/lib/android/sdk/ndk
+            /usr/local/lib/android/sdk/licenses
+          key: android-sdk-components-${{ runner.os }}-android-36-build-tools-35.0.0-ndk-27.1.12297006
+
       - name: Install SDK platform and build-tools
         run: |
           yes | sdkmanager --licenses > /dev/null
@@ -175,7 +195,7 @@ jobs:
           printf '%s' "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > release.keystore
           keytool -list -keystore release.keystore -storepass "$ANDROID_RELEASE_KEYSTORE_PASSWORD" -alias "$ANDROID_RELEASE_KEY_ALIAS" > /dev/null
 
-      - name: Build signed release APK and AAB
+      - name: Build signed release APK
         working-directory: mobile/android
         env:
           ORG_GRADLE_PROJECT_SK_UPLOAD_STORE_FILE: release.keystore
@@ -184,7 +204,7 @@ jobs:
           ORG_GRADLE_PROJECT_SK_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
           ORG_GRADLE_PROJECT_SK_VERSION_CODE: ${{ github.run_number }}
           ORG_GRADLE_PROJECT_SK_VERSION_NAME: ${{ github.ref_name }}-${{ github.run_number }}
-        run: ./gradlew assembleRelease bundleRelease --stacktrace
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Remove decoded keystore
         if: always()
@@ -196,9 +216,3 @@ jobs:
         with:
           name: app-release-apk
           path: mobile/android/app/build/outputs/apk/release/app-release.apk
-
-      - name: Upload release AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-aab
-          path: mobile/android/app/build/outputs/bundle/release/app-release.aab
