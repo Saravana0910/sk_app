@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { listCases } from '../salesforce/caseApi';
@@ -7,6 +7,7 @@ import { useAuth } from '../auth/AuthContext';
 import { LoadingView } from '../components/LoadingView';
 import { ErrorView } from '../components/ErrorView';
 import { EmptyView } from '../components/EmptyView';
+import { LaunchSiteButton } from '../components/LaunchSiteButton';
 import { getErrorMessage } from '../utils/errors';
 import type { CaseRecord } from '../types/case';
 import type { RootStackParamList } from '../types/navigation';
@@ -50,24 +51,27 @@ export function CaseListScreen() {
         return <ErrorView message={error} onRetry={load} />;
     }
 
-    if (data.length === 0) {
-        return <EmptyView message="No cases found. Tap New to create one." />;
-    }
-
     return (
-        <FlatList
-            data={data}
-            keyExtractor={(item) => item.Id}
-            renderItem={({ item }) => (
-                <Pressable
-                    style={styles.row}
-                    onPress={() => navigation.navigate('CaseDetail', { caseId: item.Id })}>
-                    <Text style={styles.caseNumber}>{item.CaseNumber}</Text>
-                    <Text style={styles.subject} numberOfLines={1}>{item.Subject}</Text>
-                    <Text style={styles.status}>{item.Status}</Text>
-                </Pressable>
+        <View style={styles.container}>
+            {data.length === 0 ? (
+                <EmptyView message="No cases found. Tap New to create one." />
+            ) : (
+                <FlatList
+                    data={data}
+                    keyExtractor={(item) => item.Id}
+                    renderItem={({ item }) => (
+                        <Pressable
+                            style={styles.row}
+                            onPress={() => navigation.navigate('CaseDetail', { caseId: item.Id })}>
+                            <Text style={styles.caseNumber}>{item.CaseNumber}</Text>
+                            <Text style={styles.subject} numberOfLines={1}>{item.Subject}</Text>
+                            <Text style={styles.status}>{item.Status}</Text>
+                        </Pressable>
+                    )}
+                />
             )}
-        />
+            <LaunchSiteButton />
+        </View>
     );
 }
 
@@ -88,6 +92,9 @@ function LogoutButton({ onPress }: { onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     row: {
         padding: 16,
         borderBottomWidth: StyleSheet.hairlineWidth,
