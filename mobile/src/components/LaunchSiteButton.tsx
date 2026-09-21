@@ -17,10 +17,12 @@ export function LaunchSiteButton() {
         }
         setLaunching(true);
         try {
-            const siteUrl = new URL(DEFAULT_SITE_URL);
-            const frontDoorUrl = `${siteUrl.origin}/secur/frontdoor.jsp?sid=${encodeURIComponent(
+            const match = /^(https?:\/\/[^/]+)(\/.*)?$/.exec(DEFAULT_SITE_URL);
+            const origin = match?.[1] ?? DEFAULT_SITE_URL;
+            const path = match?.[2] || '/';
+            const frontDoorUrl = `${origin}/secur/frontdoor.jsp?sid=${encodeURIComponent(
                 session.accessToken,
-            )}&retURL=${encodeURIComponent(siteUrl.pathname || '/')}`;
+            )}&retURL=${encodeURIComponent(path)}`;
             await Linking.openURL(frontDoorUrl);
         } finally {
             setLaunching(false);
