@@ -1,40 +1,32 @@
-import React, { useCallback, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text } from 'react-native';
+import React, { useCallback } from 'react';
+import { Pressable, StyleSheet, Text } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../auth/AuthContext';
-import { DEFAULT_SITE_URL } from '../config/site';
+import type { RootStackParamList } from '../types/navigation';
+
+type Navigation = StackNavigationProp<RootStackParamList, 'CaseList'>;
 
 /**
  * Floating, bottom-center button that launches the org's default
- * Experience Cloud site, signing the user in via frontdoor.jsp SSO.
+ * Experience Cloud site in-app, signing the user in via frontdoor.jsp SSO.
  */
 export function LaunchSiteButton() {
     const { session } = useAuth();
-    const [launching, setLaunching] = useState(false);
+    const navigation = useNavigation<Navigation>();
 
-    const handlePress = useCallback(async () => {
-        if (!session || launching) {
+    const handlePress = useCallback(() => {
+        if (!session) {
             return;
         }
-        setLaunching(true);
-        try {
-            const match = /^(https?:\/\/[^/]+)(\/.*)?$/.exec(DEFAULT_SITE_URL);
-            const origin = match?.[1] ?? DEFAULT_SITE_URL;
-            const path = match?.[2] || '/';
-            const frontDoorUrl = `${origin}/secur/frontdoor.jsp?sid=${encodeURIComponent(
-                session.accessToken,
-            )}&retURL=${encodeURIComponent(path)}`;
-            await Linking.openURL(frontDoorUrl);
-        } finally {
-            setLaunching(false);
-        }
-    }, [session, launching]);
+        navigation.navigate('SiteWebView');
+    }, [session, navigation]);
 
     return (
         <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-            onPress={handlePress}
-            disabled={launching}>
-            <Text style={styles.label}>{launching ? 'Launching…' : 'Launch Site'}</Text>
+            onPress={handlePress}>
+            <Text style={styles.label}>Launch Site</Text>
         </Pressable>
     );
 }

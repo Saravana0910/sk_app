@@ -23,7 +23,8 @@
     "react-native-safe-area-context": "5.5.2",
     "react-native-force": "git+https://github.com/forcedotcom/SalesforceMobileSDK-ReactNative.git#v13.2.1",
     "react-native-gesture-handler": "2.29.1",
-    "react-native-screens": "4.20.0"
+    "react-native-screens": "4.20.0",
+    "react-native-webview": "13.15.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
