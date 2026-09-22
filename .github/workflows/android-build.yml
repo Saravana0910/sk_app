@@ -2,6 +2,7 @@ name: Android Build
 
 permissions:
   contents: read
+  actions: write
 
 on:
   push:
