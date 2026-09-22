@@ -14,7 +14,11 @@ export function AppNavigator() {
             <Stack.Screen name="CaseList" component={CaseListScreen} options={{ title: 'Cases' }} />
             <Stack.Screen name="CaseDetail" component={CaseDetailScreen} options={{ title: 'Case Detail' }} />
             <Stack.Screen name="CaseForm" component={CaseFormScreen} options={{ title: 'Case' }} />
-            <Stack.Screen name="SiteWebView" component={SiteWebViewScreen} options={{ title: 'Site' }} />
+            <Stack.Screen
+                name="SiteWebView"
+                component={SiteWebViewScreen}
+                options={({ route }) => ({ title: route.params.useSso ? 'Site' : 'Custom Site' })}
+            />
         </Stack.Navigator>
     );
 }

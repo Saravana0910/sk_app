@@ -8,6 +8,7 @@ import { LoadingView } from '../components/LoadingView';
 import { ErrorView } from '../components/ErrorView';
 import { EmptyView } from '../components/EmptyView';
 import { LaunchSiteButton } from '../components/LaunchSiteButton';
+import { CustomSiteButton } from '../components/CustomSiteButton';
 import { getErrorMessage } from '../utils/errors';
 import type { CaseRecord } from '../types/case';
 import type { RootStackParamList } from '../types/navigation';
@@ -70,7 +71,10 @@ export function CaseListScreen() {
                     )}
                 />
             )}
-            <LaunchSiteButton />
+            <View style={styles.bottomBar}>
+                <LaunchSiteButton />
+                <CustomSiteButton />
+            </View>
         </View>
     );
 }
@@ -94,6 +98,13 @@ function LogoutButton({ onPress }: { onPress: () => void }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    bottomBar: {
+        position: 'absolute',
+        bottom: 24,
+        alignSelf: 'center',
+        flexDirection: 'row',
+        gap: 12,
     },
     row: {
         padding: 16,
