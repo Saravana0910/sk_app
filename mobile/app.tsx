@@ -27,11 +27,13 @@
 import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import type { NavigationContainerRef } from '@react-navigation/native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { LoadingView } from './src/components/LoadingView';
 import { ErrorView } from './src/components/ErrorView';
 import { onSalesforcePushNotification } from './src/utils/push';
+import { logDebug } from './src/utils/debugLog';
 import type { RootStackParamList } from './src/types/navigation';
 
 function AppContent(): React.JSX.Element {
@@ -39,8 +41,16 @@ function AppContent(): React.JSX.Element {
     const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
 
     useEffect(() => {
+        // Android 13+ silently drops notifications without this runtime grant.
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+            PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).then((result) =>
+                logDebug('[Push] POST_NOTIFICATIONS permission:', result),
+            );
+        }
+
         // "sfdc.ID" is the target record Id set via Messaging.CustomNotification.setTargetId in Apex/Flow.
         return onSalesforcePushNotification((payload) => {
+            logDebug('[Push] received:', JSON.stringify(payload));
             const caseId = payload['sfdc.ID'];
             if (caseId) {
                 navigationRef.current?.navigate('CaseDetail', { caseId });

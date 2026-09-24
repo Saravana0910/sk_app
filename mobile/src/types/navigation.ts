@@ -3,4 +3,5 @@ export type RootStackParamList = {
     CaseDetail: { caseId: string };
     CaseForm: { caseId?: string } | undefined;
     SiteWebView: { url: string; useSso: boolean };
+    DebugLog: undefined;
 };

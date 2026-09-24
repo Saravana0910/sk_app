@@ -4,6 +4,7 @@ import { CaseListScreen } from '../screens/CaseListScreen';
 import { CaseDetailScreen } from '../screens/CaseDetailScreen';
 import { CaseFormScreen } from '../screens/CaseFormScreen';
 import { SiteWebViewScreen } from '../screens/SiteWebViewScreen';
+import { DebugLogScreen } from '../screens/DebugLogScreen';
 import type { RootStackParamList } from '../types/navigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -19,6 +20,7 @@ export function AppNavigator() {
                 component={SiteWebViewScreen}
                 options={({ route }) => ({ title: route.params.useSso ? 'Site' : 'Custom Site' })}
             />
+            <Stack.Screen name="DebugLog" component={DebugLogScreen} options={{ title: 'Debug Logs' }} />
         </Stack.Navigator>
     );
 }

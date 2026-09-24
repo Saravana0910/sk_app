@@ -40,7 +40,12 @@ export function CaseListScreen() {
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => <NewButton onPress={() => navigation.navigate('CaseForm', undefined)} />,
-            headerLeft: () => <LogoutButton onPress={() => logout()} />,
+            headerLeft: () => (
+                <View style={styles.headerLeftRow}>
+                    <LogoutButton onPress={() => logout()} />
+                    <LogsButton onPress={() => navigation.navigate('DebugLog')} />
+                </View>
+            ),
         });
     }, [navigation, logout]);
 
@@ -95,9 +100,20 @@ function LogoutButton({ onPress }: { onPress: () => void }) {
     );
 }
 
+function LogsButton({ onPress }: { onPress: () => void }) {
+    return (
+        <Pressable onPress={onPress} style={styles.headerButton}>
+            <Text style={styles.headerButtonText}>Logs</Text>
+        </Pressable>
+    );
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    headerLeftRow: {
+        flexDirection: 'row',
     },
     bottomBar: {
         position: 'absolute',
