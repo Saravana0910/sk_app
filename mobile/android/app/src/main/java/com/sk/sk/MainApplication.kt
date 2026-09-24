@@ -33,11 +33,15 @@ import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
+import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
+import com.google.firebase.messaging.FirebaseMessaging
+import com.salesforce.androidsdk.push.PushNotificationInterface
 import com.salesforce.androidsdk.reactnative.app.SalesforceReactSDKManager
 
 class MainApplication : Application(), ReactApplication {
@@ -72,19 +76,18 @@ class MainApplication : Application(), ReactApplication {
 
         SalesforceReactSDKManager.initReactNative(getApplicationContext(), MainActivity::class.java)
 
-        /*
-         * Un-comment the following line to enable push notifications in this
-         * app. Replace 'pnInterface' with your implementation of
-         * 'PushNotificationInterface'. Add your Firebase 'google-services.json'
-         * file to the 'app' folder of your project.
-         */
-//        SalesforceReactSDKManager.getInstance().pushNotificationReceiver = object : PushNotificationInterface {
-//            override fun onPushMessageReceived(data: Map<String?, String?>?) {
-//            }
-//
-//            override fun supplyFirebaseMessaging(): FirebaseMessaging? {
-//                return null
-//            }
-//        }
+        // Bridges Salesforce push payloads (e.g. Custom Notifications) to JS as a "sfPushNotification" event.
+        SalesforceReactSDKManager.getInstance().pushNotificationReceiver = object : PushNotificationInterface {
+            override fun onPushMessageReceived(data: Map<String?, String?>?) {
+                val reactContext = reactNativeHost.reactInstanceManager.currentReactContext ?: return
+                val payload = Arguments.createMap()
+                data?.forEach { (key, value) -> if (key != null) payload.putString(key, value) }
+                reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit("sfPushNotification", payload)
+            }
+
+            override fun supplyFirebaseMessaging(): FirebaseMessaging = FirebaseMessaging.getInstance()
+        }
     }
 }

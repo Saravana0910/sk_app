@@ -24,15 +24,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import type { NavigationContainerRef } from '@react-navigation/native';
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { LoadingView } from './src/components/LoadingView';
 import { ErrorView } from './src/components/ErrorView';
+import { onSalesforcePushNotification } from './src/utils/push';
+import type { RootStackParamList } from './src/types/navigation';
 
 function AppContent(): React.JSX.Element {
     const { session, loading, error, retry } = useAuth();
+    const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
+
+    useEffect(() => {
+        // "sfdc.ID" is the target record Id set via Messaging.CustomNotification.setTargetId in Apex/Flow.
+        return onSalesforcePushNotification((payload) => {
+            const caseId = payload['sfdc.ID'];
+            if (caseId) {
+                navigationRef.current?.navigate('CaseDetail', { caseId });
+            }
+        });
+    }, []);
 
     if (loading) {
         return <LoadingView message="Signing in…" />;
@@ -43,7 +57,7 @@ function AppContent(): React.JSX.Element {
     }
 
     return (
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
             <AppNavigator />
         </NavigationContainer>
     );

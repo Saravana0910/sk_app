@@ -22,3 +22,5 @@ export function AppNavigator() {
         </Stack.Navigator>
     );
 }
+
+
