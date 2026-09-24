@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <servers>
+    <!-- Pre-selected so login lands on the same org/domain as the embedded site, avoiding a manual "Change Server" step. -->
+    <server name="SK Dev Org" url="https://orgfarm-84cc9e3664-dev-ed.develop.my.site.com" />
     <server name="Default" url="https://login.salesforce.com" />
 </servers>
-
