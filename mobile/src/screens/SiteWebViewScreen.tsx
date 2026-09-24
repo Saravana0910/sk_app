@@ -21,7 +21,14 @@ export function SiteWebViewScreen() {
     // useSso=false intentionally skips the access token so the site's own login page is shown.
     const uri = useSso && session ? buildFrontDoorUrl(url, session.accessToken) : url;
 
-    return <WebView style={styles.webview} source={{ uri }} />;
+    return (
+        <WebView
+            style={styles.webview}
+            source={{ uri }}
+            sharedCookiesEnabled
+            thirdPartyCookiesEnabled
+        />
+    );
 }
 
 const styles = StyleSheet.create({

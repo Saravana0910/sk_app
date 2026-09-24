@@ -3,4 +3,10 @@
 <resources>
     <string name="remoteAccessConsumerKey">3MVG9dAEux2v1sLtAzOTMVekjpCZmHSu5arj4UKZB1de4D9N84lzdpCBUTBeXtVt7gvMzyck4zS00gADKkBL1</string>
     <string name="oauthRedirectURI">sksk://oauth/success</string>
+    <!-- 'web' is required so the access token can SSO into frontdoor.jsp without a second login -->
+    <string-array name="oauthScopes">
+        <item>web</item>
+        <item>api</item>
+        <item>refresh_token</item>
+    </string-array>
 </resources>
