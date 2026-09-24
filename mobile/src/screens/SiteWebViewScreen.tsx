@@ -21,12 +21,19 @@ export function SiteWebViewScreen() {
     // useSso=false intentionally skips the access token so the site's own login page is shown.
     const uri = useSso && session ? buildFrontDoorUrl(url, session.accessToken) : url;
 
+    if (useSso && session) {
+        // Temporary diagnostics: compare against session.instanceUrl to rule out an org/domain mismatch.
+        console.log('[SiteWebView] instanceUrl:', session.instanceUrl);
+        console.log('[SiteWebView] frontDoorUrl:', uri);
+    }
+
     return (
         <WebView
             style={styles.webview}
             source={{ uri }}
             sharedCookiesEnabled
             thirdPartyCookiesEnabled
+            onNavigationStateChange={(navState) => console.log('[SiteWebView] navigated to:', navState.url)}
         />
     );
 }
