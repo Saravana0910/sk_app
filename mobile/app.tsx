@@ -24,9 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import type { NavigationContainerRef } from '@react-navigation/native';
 import { Alert, Linking, PermissionsAndroid, Platform } from 'react-native';
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
@@ -34,11 +33,9 @@ import { LoadingView } from './src/components/LoadingView';
 import { ErrorView } from './src/components/ErrorView';
 import { onSalesforcePushNotification } from './src/utils/push';
 import { logDebug } from './src/utils/debugLog';
-import type { RootStackParamList } from './src/types/navigation';
 
 function AppContent(): React.JSX.Element {
     const { session, loading, error, retry } = useAuth();
-    const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
 
     useEffect(() => {
         // Android 13+ silently drops notifications without this runtime grant.
@@ -56,13 +53,9 @@ function AppContent(): React.JSX.Element {
             });
         }
 
-        // "sfdc.ID" is the target record Id set via Messaging.CustomNotification.setTargetId in Apex/Flow.
+        // Custom Notification payloads carry no target record id, so there is nothing to deep-link to.
         return onSalesforcePushNotification((payload) => {
             logDebug('[Push] received:', JSON.stringify(payload));
-            const caseId = payload['sfdc.ID'];
-            if (caseId) {
-                navigationRef.current?.navigate('CaseDetail', { caseId });
-            }
         });
     }, []);
 
@@ -75,7 +68,7 @@ function AppContent(): React.JSX.Element {
     }
 
     return (
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer>
             <AppNavigator />
         </NavigationContainer>
     );

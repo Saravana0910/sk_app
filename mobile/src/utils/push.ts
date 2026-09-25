@@ -2,8 +2,17 @@ import { DeviceEventEmitter, NativeModules } from 'react-native';
 
 const { PushDiagnostics } = NativeModules;
 
-/** Raw key/value payload delivered from a Salesforce push/Custom Notification. */
-export type SalesforcePushPayload = Record<string, string>;
+/** A Salesforce notification, unwrapped from its `content` -> `sfdc` envelope by the native bridge. */
+export type SalesforcePushPayload = {
+    title?: string;
+    body?: string;
+    /** Salesforce's notification id. */
+    nid?: string;
+    /** Id of the CustomNotificationType that produced this notification. */
+    notifType?: string;
+    /** Recipient user id. */
+    uid?: string;
+};
 
 /** Subscribes to native push payloads bridged from MainApplication.kt's pushNotificationReceiver. */
 export function onSalesforcePushNotification(handler: (payload: SalesforcePushPayload) => void) {
@@ -33,9 +42,4 @@ export function sendTestNotification(): Promise<boolean> {
 /** Re-runs Salesforce device registration, which the SDK otherwise only does at login. */
 export function registerForPush(): Promise<void> {
     return PushDiagnostics.registerForPush();
-}
-
-/** The full token, for the Firebase console test sender. Keep it out of the shareable debug log. */
-export function getFcmToken(): Promise<string> {
-    return PushDiagnostics.getFcmToken();
 }

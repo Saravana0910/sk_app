@@ -27,9 +27,11 @@ class PushDiagnosticsModule(private val reactContext: ReactApplicationContext) :
         promise.resolve(
             showPushNotification(
                 reactContext,
-                mapOf(
-                    "title" to "Test notification",
-                    "alert" to "If you can see this, the device can display Salesforce pushes.",
+                SalesforcePush(
+                    title = "Test notification",
+                    body = "If you can see this, the device can display Salesforce pushes.",
+                    notificationId = null,
+                    fields = emptyMap(),
                 ),
             ),
         )
@@ -71,14 +73,6 @@ class PushDiagnosticsModule(private val reactContext: ReactApplicationContext) :
         }
         PushMessaging.register(reactContext, account)
         promise.resolve(null)
-    }
-
-    /** Returned in full, for pasting into the Firebase console's test sender. Never log this. */
-    @ReactMethod
-    fun getFcmToken(promise: Promise) {
-        FirebaseMessaging.getInstance().token
-            .addOnSuccessListener { promise.resolve(it) }
-            .addOnFailureListener { promise.reject("FCM_TOKEN_UNAVAILABLE", it) }
     }
 }
 

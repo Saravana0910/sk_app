@@ -3,4 +3,5 @@
     <string name="account_type">com.sk.sk.login</string>
 	<string name="app_name">SK</string>
 	<string name="app_package">com.sk.sk</string>
+	<string name="push_fallback_body">You have a new Salesforce notification.</string>
 </resources>

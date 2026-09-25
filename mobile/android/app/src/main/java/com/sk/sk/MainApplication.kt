@@ -83,11 +83,15 @@ class MainApplication : Application(), ReactApplication {
         SalesforceReactSDKManager.getInstance().pushNotificationReceiver = object : PushNotificationInterface {
             override fun onPushMessageReceived(data: Map<String?, String?>?) {
                 if (data == null) return
-                showPushNotification(applicationContext, data)
+                val push = SalesforcePush.from(data)
+                showPushNotification(applicationContext, push)
 
                 val reactContext = reactNativeHost.reactInstanceManager.currentReactContext ?: return
-                val payload = Arguments.createMap()
-                data.forEach { (key, value) -> if (key != null) payload.putString(key, value) }
+                val payload = Arguments.createMap().apply {
+                    push.fields.forEach { (key, value) -> putString(key, value) }
+                    putString("title", push.title)
+                    putString("body", push.body)
+                }
                 reactContext
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                     .emit("sfPushNotification", payload)
