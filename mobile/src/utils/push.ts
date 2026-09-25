@@ -27,3 +27,8 @@ export function getPushStatus(): Promise<PushStatus> {
 export function sendTestNotification(): Promise<boolean> {
     return PushDiagnostics.sendTestNotification();
 }
+
+/** Re-runs Salesforce device registration, which the SDK otherwise only does at login. */
+export function registerForPush(): Promise<void> {
+    return PushDiagnostics.registerForPush();
+}

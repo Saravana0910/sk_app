@@ -58,6 +58,18 @@ class PushDiagnosticsModule(private val reactContext: ReactApplicationContext) :
                 promise.resolve(status)
             }
     }
+
+    /** The SDK only registers the device at login, so this re-runs it against the current org config. */
+    @ReactMethod
+    fun registerForPush(promise: Promise) {
+        val account = SalesforceSDKManager.getInstance().userAccountManager?.currentUser
+        if (account == null) {
+            promise.reject("NOT_AUTHENTICATED", "No logged-in Salesforce user.")
+            return
+        }
+        PushMessaging.register(reactContext, account)
+        promise.resolve(null)
+    }
 }
 
 /** Debug logs are shareable, so only ever expose enough of a token to prove it exists. */

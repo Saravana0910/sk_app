@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Share, StyleSheet, Text, View, Pressable } from 'react-native';
 import { getDebugLogs, logDebug, subscribeDebugLogs } from '../utils/debugLog';
-import { getPushStatus, sendTestNotification } from '../utils/push';
+import { getPushStatus, registerForPush, sendTestNotification } from '../utils/push';
 
 /** On-device log viewer for troubleshooting without Metro/adb access. */
 export function DebugLogScreen() {
@@ -24,14 +24,27 @@ export function DebugLogScreen() {
         }
     };
 
+    // Registration is async, so the device id only shows up on a later status check.
+    const handleRegisterForPush = async () => {
+        try {
+            await registerForPush();
+            logDebug('[Push] registration requested; re-check status in a few seconds.');
+        } catch (e) {
+            logDebug('[Push] registration failed:', e instanceof Error ? e.message : String(e));
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.actions}>
                 <Pressable style={styles.button} onPress={handleShare}>
-                    <Text style={styles.buttonLabel}>Share / Save Logs</Text>
+                    <Text style={styles.buttonLabel}>Share Logs</Text>
                 </Pressable>
                 <Pressable style={styles.button} onPress={handleTestNotification}>
                     <Text style={styles.buttonLabel}>Test Notification</Text>
+                </Pressable>
+                <Pressable style={styles.button} onPress={handleRegisterForPush}>
+                    <Text style={styles.buttonLabel}>Re-register Push</Text>
                 </Pressable>
             </View>
             <ScrollView style={styles.scroll}>
@@ -63,6 +76,8 @@ const styles = StyleSheet.create({
     buttonLabel: {
         color: '#fff',
         fontWeight: '600',
+        fontSize: 12,
+        textAlign: 'center',
     },
     scroll: {
         flex: 1,
