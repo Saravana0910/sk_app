@@ -70,6 +70,14 @@ class PushDiagnosticsModule(private val reactContext: ReactApplicationContext) :
         PushMessaging.register(reactContext, account)
         promise.resolve(null)
     }
+
+    /** Returned in full, for pasting into the Firebase console's test sender. Never log this. */
+    @ReactMethod
+    fun getFcmToken(promise: Promise) {
+        FirebaseMessaging.getInstance().token
+            .addOnSuccessListener { promise.resolve(it) }
+            .addOnFailureListener { promise.reject("FCM_TOKEN_UNAVAILABLE", it) }
+    }
 }
 
 /** Debug logs are shareable, so only ever expose enough of a token to prove it exists. */

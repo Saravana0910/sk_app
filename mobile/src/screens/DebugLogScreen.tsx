@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, Share, StyleSheet, Text, View, Pressable } from 'react-native';
 import { getDebugLogs, logDebug, subscribeDebugLogs } from '../utils/debugLog';
-import { getPushStatus, registerForPush, sendTestNotification } from '../utils/push';
+import { getFcmToken, getPushStatus, registerForPush, sendTestNotification } from '../utils/push';
 
 /** On-device log viewer for troubleshooting without Metro/adb access. */
 export function DebugLogScreen() {
     const [lines, setLines] = useState<string[]>(getDebugLogs());
+    const [fcmToken, setFcmToken] = useState<string | null>(null);
 
     useEffect(() => subscribeDebugLogs(setLines), []);
 
@@ -34,6 +35,15 @@ export function DebugLogScreen() {
         }
     };
 
+    // Rendered on screen rather than logged, since the log can be shared out of the app.
+    const handleShowFcmToken = async () => {
+        try {
+            setFcmToken(await getFcmToken());
+        } catch (e) {
+            logDebug('[Push] FCM token unavailable:', e instanceof Error ? e.message : String(e));
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.actions}>
@@ -46,7 +56,15 @@ export function DebugLogScreen() {
                 <Pressable style={styles.button} onPress={handleRegisterForPush}>
                     <Text style={styles.buttonLabel}>Re-register Push</Text>
                 </Pressable>
+                <Pressable style={styles.button} onPress={handleShowFcmToken}>
+                    <Text style={styles.buttonLabel}>Show FCM Token</Text>
+                </Pressable>
             </View>
+            {fcmToken && (
+                <Text selectable style={styles.token}>
+                    {fcmToken}
+                </Text>
+            )}
             <ScrollView style={styles.scroll}>
                 <Text selectable style={styles.text}>
                     {lines.length > 0 ? lines.join('\n\n') : 'No logs yet.'}
@@ -63,6 +81,7 @@ const styles = StyleSheet.create({
     },
     actions: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         gap: 8,
         margin: 12,
     },
@@ -79,11 +98,17 @@ const styles = StyleSheet.create({
         fontSize: 12,
         textAlign: 'center',
     },
+    token: {
+        color: '#ff0',
+        fontFamily: 'monospace',
+        fontSize: 10,
+        paddingHorizontal: 12,
+        paddingBottom: 8,
+    },
     scroll: {
         flex: 1,
         paddingHorizontal: 12,
-    },
-    text: {
+    },    text: {
         color: '#0f0',
         fontFamily: 'monospace',
         fontSize: 12,

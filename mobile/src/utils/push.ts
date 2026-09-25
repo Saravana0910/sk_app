@@ -32,3 +32,8 @@ export function sendTestNotification(): Promise<boolean> {
 export function registerForPush(): Promise<void> {
     return PushDiagnostics.registerForPush();
 }
+
+/** The full token, for the Firebase console test sender. Keep it out of the shareable debug log. */
+export function getFcmToken(): Promise<string> {
+    return PushDiagnostics.getFcmToken();
+}
