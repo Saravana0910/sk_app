@@ -13,6 +13,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicInteger
 
 private const val TAG = "SKPush"
@@ -28,11 +29,15 @@ private val nextNotificationId = AtomicInteger(1)
  * @return true if the notification was posted.
  */
 fun showPushNotification(context: Context, data: Map<String?, String?>): Boolean {
-    val body = data["alert"] ?: data["body"] ?: data["message"]
-    if (body == null) {
-        Log.w(TAG, "Dropping push with no alert/body/message key: ${data.keys}")
-        return false
-    }
+    Log.i(TAG, "Push received with keys ${data.keys}")
+
+    // Salesforce nests the notification under "content" as JSON once PushNotificationDecryptor runs.
+    val content = data["content"]?.let { runCatching { JSONObject(it) }.getOrNull() }
+    val title = content?.pick("title") ?: data["title"] ?: context.getString(R.string.app_name)
+    val body = content?.pick("body") ?: content?.pick("alert")
+        ?: data["alert"] ?: data["body"] ?: data["message"]
+        // Showing an unrecognised payload verbatim beats dropping it with no trace.
+        ?: data.toString()
 
     val manager = context.getSystemService(NotificationManager::class.java)
     manager.createNotificationChannel(
@@ -50,7 +55,7 @@ fun showPushNotification(context: Context, data: Map<String?, String?>): Boolean
 
     val notification = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_notification)
-        .setContentTitle(data["title"] ?: context.getString(R.string.app_name))
+        .setContentTitle(title)
         .setContentText(body)
         .setStyle(NotificationCompat.BigTextStyle().bigText(body))
         .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -66,3 +71,5 @@ fun showPushNotification(context: Context, data: Map<String?, String?>): Boolean
     manager.notify(data["sfdc.nid"]?.hashCode() ?: nextNotificationId.getAndIncrement(), notification)
     return true
 }
+
+private fun JSONObject.pick(key: String) = optString(key).takeIf { it.isNotEmpty() }
