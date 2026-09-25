@@ -53,6 +53,7 @@ class MainApplication : Application(), ReactApplication {
                     // Packages that cannot be autolinked yet can be added manually here, for example:
                     // add(MyReactNativePackage())
                     add(SalesforceReactSDKManager.getInstance().getReactPackage())
+                    add(SingleAccessPackage())
                 }
 
             override fun getJSMainModuleName(): String = "index"
