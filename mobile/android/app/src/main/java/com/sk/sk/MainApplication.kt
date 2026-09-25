@@ -54,6 +54,7 @@ class MainApplication : Application(), ReactApplication {
                     // add(MyReactNativePackage())
                     add(SalesforceReactSDKManager.getInstance().getReactPackage())
                     add(SingleAccessPackage())
+                    add(PushDiagnosticsPackage())
                 }
 
             override fun getJSMainModuleName(): String = "index"
@@ -77,12 +78,16 @@ class MainApplication : Application(), ReactApplication {
 
         SalesforceReactSDKManager.initReactNative(getApplicationContext(), MainActivity::class.java)
 
-        // Bridges Salesforce push payloads (e.g. Custom Notifications) to JS as a "sfPushNotification" event.
+        // Posts Salesforce push payloads (e.g. Custom Notifications) to the tray and, when the
+        // JS runtime is alive, bridges them to JS as a "sfPushNotification" event.
         SalesforceReactSDKManager.getInstance().pushNotificationReceiver = object : PushNotificationInterface {
             override fun onPushMessageReceived(data: Map<String?, String?>?) {
+                if (data == null) return
+                showPushNotification(applicationContext, data)
+
                 val reactContext = reactNativeHost.reactInstanceManager.currentReactContext ?: return
                 val payload = Arguments.createMap()
-                data?.forEach { (key, value) -> if (key != null) payload.putString(key, value) }
+                data.forEach { (key, value) -> if (key != null) payload.putString(key, value) }
                 reactContext
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                     .emit("sfPushNotification", payload)

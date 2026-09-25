@@ -1,4 +1,6 @@
-import { DeviceEventEmitter } from 'react-native';
+import { DeviceEventEmitter, NativeModules } from 'react-native';
+
+const { PushDiagnostics } = NativeModules;
 
 /** Raw key/value payload delivered from a Salesforce push/Custom Notification. */
 export type SalesforcePushPayload = Record<string, string>;
@@ -7,4 +9,21 @@ export type SalesforcePushPayload = Record<string, string>;
 export function onSalesforcePushNotification(handler: (payload: SalesforcePushPayload) => void) {
     const subscription = DeviceEventEmitter.addListener('sfPushNotification', handler);
     return () => subscription.remove();
+}
+
+export type PushStatus = {
+    notificationsEnabled: boolean;
+    /** Null until the org creates a MobilePushServiceDevice row for this device. */
+    salesforceDeviceId: string | null;
+    storedFcmToken: string | null;
+    liveFcmToken: string | null;
+};
+
+export function getPushStatus(): Promise<PushStatus> {
+    return PushDiagnostics.getStatus();
+}
+
+/** Posts a local notification through the same code path a real Salesforce push takes. */
+export function sendTestNotification(): Promise<boolean> {
+    return PushDiagnostics.sendTestNotification();
 }

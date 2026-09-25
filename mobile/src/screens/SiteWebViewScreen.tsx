@@ -33,8 +33,9 @@ export function SiteWebViewScreen() {
                 setUri(frontDoorUrl);
             })
             .catch((e) => {
-                logDebug('[SiteWebView] UI Bridge error:', String(e));
-                setError('Unable to open the site.');
+                const detail = e instanceof Error ? e.message : String(e);
+                logDebug('[SiteWebView] UI Bridge error:', detail);
+                setError(`Unable to open the site. ${detail}`);
             });
     }, [useSso, session, url]);
 

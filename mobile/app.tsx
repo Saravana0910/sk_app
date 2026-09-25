@@ -27,7 +27,7 @@
 import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import type { NavigationContainerRef } from '@react-navigation/native';
-import { PermissionsAndroid, Platform } from 'react-native';
+import { Alert, Linking, PermissionsAndroid, Platform } from 'react-native';
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { LoadingView } from './src/components/LoadingView';
@@ -43,9 +43,17 @@ function AppContent(): React.JSX.Element {
     useEffect(() => {
         // Android 13+ silently drops notifications without this runtime grant.
         if (Platform.OS === 'android' && Platform.Version >= 33) {
-            PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).then((result) =>
-                logDebug('[Push] POST_NOTIFICATIONS permission:', result),
-            );
+            PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS).then((result) => {
+                logDebug('[Push] POST_NOTIFICATIONS permission:', result);
+                // "never_ask_again" means Android will no longer show the dialog, so only Settings can grant it.
+                if (result === 'never_ask_again') {
+                    Alert.alert(
+                        'Notifications are blocked',
+                        'Enable notifications for this app in Android Settings to receive Salesforce alerts.',
+                        [{ text: 'Not now' }, { text: 'Open Settings', onPress: () => Linking.openSettings() }],
+                    );
+                }
+            });
         }
 
         // "sfdc.ID" is the target record Id set via Messaging.CustomNotification.setTargetId in Apex/Flow.

@@ -7,6 +7,6 @@ const { SingleAccessBridge } = NativeModules;
  * frontdoor URL via the native SingleAccessModule (Identity API UI Bridge),
  * instead of the app constructing frontdoor.jsp with a raw access token.
  */
-export function getFrontDoorUrl(redirectUri: string): Promise<string> {
-    return SingleAccessBridge.getFrontDoorUrl(redirectUri);
+export function getFrontDoorUrl(siteUrl: string): Promise<string> {
+    return SingleAccessBridge.getFrontDoorUrl(siteUrl);
 }
