@@ -13,6 +13,8 @@ export function onSalesforcePushNotification(handler: (payload: SalesforcePushPa
 
 export type PushStatus = {
     notificationsEnabled: boolean;
+    /** The Salesforce user the device registration belongs to. */
+    userId: string | null;
     /** Null until the org creates a MobilePushServiceDevice row for this device. */
     salesforceDeviceId: string | null;
     storedFcmToken: string | null;

@@ -44,6 +44,8 @@ class PushDiagnosticsModule(private val reactContext: ReactApplicationContext) :
         )
 
         val account = SalesforceSDKManager.getInstance().userAccountManager?.currentUser
+        // The device registration belongs to this user; notifications sent to anyone else won't arrive.
+        status.putString("userId", account?.userId)
         // A null salesforceDeviceId means the org never created a MobilePushServiceDevice row.
         status.putString("salesforceDeviceId", account?.let { PushMessaging.getDeviceId(reactContext, it) })
         status.putString("storedFcmToken", account?.let { PushMessaging.getRegistrationId(reactContext, it) }.fingerprint())
