@@ -13,6 +13,7 @@ import com.salesforce.androidsdk.app.SalesforceSDKManager
 import com.salesforce.androidsdk.rest.RestClient
 import com.salesforce.androidsdk.rest.RestRequest
 import com.salesforce.androidsdk.rest.RestResponse
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.net.URI
@@ -20,6 +21,7 @@ import java.net.URLEncoder
 
 private const val FRONTDOOR_URI_KEY = "frontdoor_uri"
 private const val SINGLE_ACCESS_PATH = "/services/oauth2/singleaccess"
+private val FORM_URLENCODED = "application/x-www-form-urlencoded".toMediaType()
 
 /**
  * Bridges the Mobile SDK's Identity API "Single Access" UI Bridge to JS, so a
@@ -65,7 +67,7 @@ class SingleAccessModule(reactContext: ReactApplicationContext) : ReactContextBa
                 RestRequest.RestEndpoint.INSTANCE,
                 origin + SINGLE_ACCESS_PATH,
                 ("redirect_uri=" + URLEncoder.encode(redirectUri, RestRequest.UTF_8))
-                    .toRequestBody(RestRequest.MEDIA_TYPE_FORM_URLENCODED),
+                    .toRequestBody(FORM_URLENCODED),
                 null,
             )
             restClient.sendAsync(request, object : RestClient.AsyncRequestCallback {
